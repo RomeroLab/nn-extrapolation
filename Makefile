@@ -3,6 +3,9 @@ DATE=$(date +'%m%d%Y')
 all: preprocess
 	echo "Done"
 
+extrapolation:
+	echo
+
 preprocess: download # check to see if this is the best way to specify to download if folders do not exist
 	mkdir merged_reads
 	for d in fastq_files/ ; do

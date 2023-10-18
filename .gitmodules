@@ -1,0 +1,3 @@
+[submodule "nn4dms"]
+	path = nn4dms
+	url = git@github.com:gitter-lab/nn4dms.git
