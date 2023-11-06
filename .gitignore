@@ -3,3 +3,5 @@ designs_counts_original.csv
 reformat_df.py
 pretrained_models/*
 data/olson_pred_fitnesses.csv
+.DS_Store
+.ipynb_checkpoints/
