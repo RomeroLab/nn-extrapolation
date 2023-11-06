@@ -16,7 +16,7 @@ This module has been tested on the following systems:
 - macOS: Mojave (10.14.6)
 - Linux: Green Obsidian (8.8)
 
-## Data Analysis and Generation of Main and Supplementary Figures
+## Data Analysis
 ### Extrapolating Learned Protein Fitness Lanscapes
 
 ```
