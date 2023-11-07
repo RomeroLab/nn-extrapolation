@@ -5,3 +5,4 @@ pretrained_models/*
 data/olson_pred_fitnesses.csv
 .DS_Store
 .ipynb_checkpoints/
+__pycache__/

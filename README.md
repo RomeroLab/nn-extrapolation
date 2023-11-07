@@ -17,11 +17,36 @@ This module has been tested on the following systems:
 - Linux: Green Obsidian (8.8)
 
 ## Data Analysis
-### Extrapolating Learned Protein Fitness Lanscapes
-
-```
+### Extrapolating learned protein fitness lanscapes
+Generate predictions for the Wu et al. 1-4 mutant GB1 fitness dataset.
+``` bash
 python 01_extrapolation_predictions.py
+```
+
+Generate extrapolation trajectories.
+``` bash
 python 01_extrapolation_trajectories.py
 ```
 
+Generate plots for Fig 1 and Fig S1 in `01_extrapolation_analysis.ipynb`
 
+### ML-guided protein design for deep exploration of the fitness landscape
+Design sequences using `02_run_sa.py`. See example below. Each design can take minutes to hours, depending on the model; this can be accelerated by running on a GPU.
+``` bash
+python 02_run_sa.py data/config_example.txt
+```
+
+Generate plots for Fig 2 and Fig S2-3 in `02_designs_analysis.ipynb`
+
+### Large-scale experimental characterization of ML designed GB1 variants
+From the raw fastq files, preprocess the results and determine counts for each variant in the library. (fastq files will be downloadable from the SRA; save the fastq files in a directory `fastq_files`). This step can take hours to days.
+``` bash
+mkdir merged_reads
+for d in fastq_files/ ; do
+python 03_preprocessing.py fastq_files/${d} ${d:0:6} merged_reads/ designs.csv designs_counts.csv
+```
+
+Generate plots for Fig 3 and Fig S4-8 in `03_design_experimental_analysis.ipynb`
+
+### ML designed GB1s show improved display and IgG binding
+Generate plots for Fig 4 and Fig S9 in `03_design_experimental_analysis.ipynb`
