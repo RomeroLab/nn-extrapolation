@@ -1,0 +1,1 @@
+Directory for source data produced during data analyses in Jupyter notebooks numbered 01 through 05. Files are not included in repo and will be generated as notebooks are executed. All source data here are included in `Source Data.xlsx`.
