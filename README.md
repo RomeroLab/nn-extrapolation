@@ -4,8 +4,15 @@
 ## Installation
 The code in this module is built on the [nn4dms](github.com/gitter-lab/nn4dms) machine learning models and module. This module has the same requirements as nn4dms, with a few additional dependencies. Use [conda](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#create-env-file-manually) to set up an environment from [env.yml](env.yml)
 
+The model code is in the linked repo [nn4dms](https://github.com/gitter-lab/nn4dms/tree/2b4fcfd6c6e90321f21fa3264f677d639f33ba83). This code is required to reproduce some of our inference results. To clone both `nn-extrapolation` and `nn4dms`, use the following command:
+
 ```
-conda env create -f env.yml
+gh repo clone RomeroLab/nn-extrapolation -- --recurse-submodules
+```
+
+Conda environment install and activation:
+```
+conda env create -f environment.yml
 conda activate gb1_inf
 ```
 
