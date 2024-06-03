@@ -7,18 +7,30 @@
 import numpy as np
 import pandas as pd
 from os.path import isfile, join, exists
-from os import listdir
+from os import listdir, chdir
+from tqdm import tqdm
 
 from os.path import abspath
 import sys
-module_path = abspath("nn4dms/code")
+
+
+# for relative paths in nn4dms code to work properly, we need to set the current working
+# directory to the root of the project
+# we also need to add the code folder to the system path for imports to work properly
+print('Setting working directory to nn4dms root.')
+chdir('nn4dms_nn-extrapolate')
+module_path = abspath("code")
 if module_path not in sys.path:
     sys.path.append(module_path)
+
+# add relative path to write directory (nn-extrapolation)
+nnextrap_root_relpath = ".."
 
 import constants
 import utils
 import encode as enc
 import inference as inf
+import inference_lr as inf_lr
 import design_tools as dt
 
 ''' 
@@ -46,7 +58,7 @@ positions = [38, 39, 40, 53]
 WT_res = "VDGV" # TODO: Check that this is WT!
 
 # load data from Wu et al.
-df = pd.read_csv('data/elife-16965-supp1-v4.csv')
+df = pd.read_csv(join(nnextrap_root_relpath, 'data/elife-16965-supp1-v4.csv'))
 
 
 # get full amino acid sequnce
@@ -69,21 +81,28 @@ df['enrich2_fit'] = calc_enrich(wt_unsel, wt_sel, df['Count input'].to_numpy(), 
 
 
 # encode variants
+print('Encoding variants...')
 encoded_variants = enc.encode(encoding="one_hot,aa_index", char_seqs=df.sequence.tolist(), wt_aa=[aa for aa in WT])
 
 models = ['lr', 'fcn', 'gcn', 'cnn']
 
-ind_model_path = 'pretrained_models/other_models/gb1_'
-for model in models:
-    # model_sess = inf.restore_sess(path + model)
+ind_model_path = join(nnextrap_root_relpath, 'pretrained_models/other_models/gb1_')
+print('Calculating fitnesses for LR, GCN, GCN, and CNN models...')
+for model in tqdm(models, total=len(models), ncols=100, desc="Model"):
+    # get fitnesses from individual models used in paper
+    # lr requires separate inference to remove ph parameter
     with inf.restore_sess(ind_model_path + model) as model_sess:
-        df[model+'_pred'] = inf.run_inference(encoded_data=encoded_variants, sess=model_sess)
+        if model == 'lr':
+            df[model+'_pred'] = inf_lr.run_inference_lr(encoded_data=encoded_variants, sess=model_sess)
+        # use inf import for all other models
+        else:
+            df[model+'_pred'] = inf.run_inference(encoded_data=encoded_variants, sess=model_sess)
 
     num_models = 100
     found_models = []
     model_paths = []
-    for i in range(num_models):
-        path = 'pretrained_models/'+model+'s/model_'+str(i)
+    for i in tqdm(range(num_models), total=num_models, ncols=100, leave=False):
+        path = join(nnextrap_root_relpath, 'pretrained_models/'+model+'s/model_'+str(i))
         if (exists(path)):
             for file_name in listdir(path):
                 if '.pb' in file_name:
@@ -97,12 +116,39 @@ for model in models:
     for model_path in model_paths:
         model_sesses.append(inf.restore_sess_from_pb(model_path))
 
-    # run inferences
+    # run inferences for additional models
     model_pred_all = []
     for sess in model_sesses:
-        model_pred_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
+        if model == 'lr':
+            model_pred_all.append(inf_lr.run_inference_lr(encoded_data=encoded_variants, sess=sess))
+        else:
+            model_pred_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
     
     df[model+'_pred_all'] = list(zip(*model_pred_all))
 
-# save to csv
-df.to_csv('gen_data/pred_extrapolation_wu.csv')
+
+# further process predictions to save only essential data used for processing. Must do this because full
+# output is ~1.3 GB, which is too big for GitHub.
+
+# get fitness for EnsC and EnsM by taking 5th lowest value and median value from cnn_pred_all
+df['cnn_pred_all_sort'] = [pd.Series(ele).sort_values() for ele in df['cnn_pred_all']]
+df['ensc_pred'] = [ele.iloc[5] for ele in df['cnn_pred_all_sort']]
+df['ensm_pred'] = [ele.median() for ele in df['cnn_pred_all_sort']]
+
+# columns to save
+save_columns = [
+    'Variants',
+    'HD',
+    'enrich2_fit',
+    'lr_pred',
+    'fcn_pred',
+    'cnn_pred',
+    'ensc_pred',
+    'ensm_pred',
+    'gcn_pred',
+]
+
+# save processed data to csv
+df[save_columns].to_csv(join(nnextrap_root_relpath, 'gen_data/pred_extrapolation_wu.csv'))
+# save full data to csv
+df.to_csv(join(nnextrap_root_relpath, 'gen_data/raw_pred_extrapolation_wu.csv'))

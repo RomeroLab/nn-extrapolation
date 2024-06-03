@@ -5,20 +5,31 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from os.path import isfile, join, exists
-from os import listdir
+from os import listdir, chdir
 from scipy.stats import spearmanr
 
 
 from os.path import abspath
 import sys
-module_path = abspath("nn4dms/code")
+
+
+# for relative paths in nn4dms code to work properly, we need to set the current working
+# directory to the root of the project
+# we also need to add the code folder to the system path for imports to work properly
+print('Setting working directory to nn4dms root.')
+chdir('nn4dms_nn-extrapolate')
+module_path = abspath("code")
 if module_path not in sys.path:
     sys.path.append(module_path)
+
+# add relative path to write directory (nn-extrapolation)
+nnextrap_root_relpath = ".."
 
 import constants
 import utils
 import encode as enc
 import inference as inf
+import inference_lr as inf_lr
 import design_tools as dt
 
 
@@ -37,7 +48,7 @@ for direction in ['all', 'all_down', 'wt']:
         found_models = []
         model_paths = []
         for i in range(num_models):
-            path = 'pretrained_models/'+model+'s/model_'+str(i)
+            path = join(nnextrap_root_relpath, 'pretrained_models/'+model+'s/model_'+str(i))
             if (exists(path)):
                 for file_name in listdir(path):
                     if '.pb' in file_name:
@@ -59,7 +70,10 @@ for direction in ['all', 'all_down', 'wt']:
 
             functions_all = []
             for sess in model_sesses: # TODO: change back to all cnns
-                functions_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
+                if model == 'lr':
+                    functions_all.append(inf_lr.run_inference_lr(encoded_data=encoded_variants, sess=sess))
+                else:
+                    functions_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
             functions = np.median(functions_all, axis=0)
             seqs_mut_df = pd.DataFrame(data=list(zip(seqs, np.array(functions_all).T, [functions])), 
                                        columns=['seq', 'func_all', 'func'])
@@ -92,13 +106,16 @@ for direction in ['all', 'all_down', 'wt']:
                 encoded_variants = enc.encode(encoding="one_hot,aa_index", char_seqs=seqs, wt_aa=[aa for aa in WT])
 
                 functions_all = []
-                for sess in model_sesses: 
-                    functions_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
+                for sess in model_sesses:
+                    if model == 'lr':
+                        functions_all.append(inf_lr.run_inference_lr(encoded_data=encoded_variants, sess=sess))
+                    else:
+                        functions_all.append(inf.run_inference(encoded_data=encoded_variants, sess=sess))
                 functions = np.median(functions_all, axis=0)
                 # get next mutant in trajectory as min/max of median model prediction
                 seqs_mut_df = pd.DataFrame(data=list(zip(possible_muts, join_muts, seqs, np.array(functions_all).T, functions)), 
                                            columns=['added_mut', 'join_mut', 'seq', 'func_all', 'func'])
-                if direction == 'all'
+                if direction == 'all':
                     seqs_mut_df.sort_values('func', ascending=False, inplace=True)
                 else:
                     seqs_mut_df.sort_values('func', ascending=True, inplace=True)
@@ -117,4 +134,4 @@ for direction in ['all', 'all_down', 'wt']:
 
 
     func_df = pd.DataFrame(data=list(zip(*func_all_list)), columns=label_list)
-    func_df.to_csv('gen_data/mut_func_'+direction+'.csv')
+    func_df.to_csv(join(nnextrap_root_relpath, 'gen_data/mut_func_'+direction+'_tmp.csv'))
