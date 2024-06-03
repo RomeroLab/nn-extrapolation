@@ -1,6 +1,3 @@
-[submodule "nn4dms"]
-	path = nn4dms
-	url = git@github.com:gitter-lab/nn4dms.git
 [submodule "nn4dms_nn-extrapolate"]
 	path = nn4dms_nn-extrapolate
 	url = https://github.com/RomeroLab/nn4dms_nn-extrapolate.git
