@@ -24,7 +24,7 @@ if module_path not in sys.path:
 
 # add relative path to write directory (nn-extrapolation)
 nnextrap_root_relpath = ".."
-pretrained_dir = "nn-extrapolate-models/pretrained_models"
+pretrained_dir = "nn-extrapolation-models/pretrained_models"
 
 import constants
 import utils
