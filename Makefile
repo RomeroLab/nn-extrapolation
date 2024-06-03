@@ -4,7 +4,7 @@ all: preprocess
 	echo "Done"
 
 extrapolation:
-	echo
+	python 01_extrapolation_predictions.py
 
 preprocess: download # check to see if this is the best way to specify to download if folders do not exist
 	mkdir merged_reads
