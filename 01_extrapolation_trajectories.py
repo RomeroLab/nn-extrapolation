@@ -24,6 +24,7 @@ if module_path not in sys.path:
 
 # add relative path to write directory (nn-extrapolation)
 nnextrap_root_relpath = ".."
+pretrained_dir = "nn-extrapolate-models/pretrained_models"
 
 import constants
 import utils
@@ -48,7 +49,7 @@ for direction in ['all', 'all_down', 'wt']:
         found_models = []
         model_paths = []
         for i in range(num_models):
-            path = join(nnextrap_root_relpath, 'pretrained_models/'+model+'s/model_'+str(i))
+            path = join(nnextrap_root_relpath, pretrained_dir, model+'s/model_'+str(i))
             if (exists(path)):
                 for file_name in listdir(path):
                     if '.pb' in file_name:

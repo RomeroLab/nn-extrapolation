@@ -25,6 +25,7 @@ if module_path not in sys.path:
 
 # add relative path to write directory (nn-extrapolation)
 nnextrap_root_relpath = ".."
+pretrained_dir = "nn-extrapolate-models/pretrained_models"
 
 import constants
 import utils
@@ -86,7 +87,7 @@ encoded_variants = enc.encode(encoding="one_hot,aa_index", char_seqs=df.sequence
 
 models = ['lr', 'fcn', 'gcn', 'cnn']
 
-ind_model_path = join(nnextrap_root_relpath, 'pretrained_models/other_models/gb1_')
+ind_model_path = join(nnextrap_root_relpath, pretrained_dir, 'other_models/gb1_')
 print('Calculating fitnesses for LR, GCN, GCN, and CNN models...')
 for model in tqdm(models, total=len(models), ncols=100, desc="Model"):
     # get fitnesses from individual models used in paper
@@ -102,7 +103,7 @@ for model in tqdm(models, total=len(models), ncols=100, desc="Model"):
     found_models = []
     model_paths = []
     for i in tqdm(range(num_models), total=num_models, ncols=100, leave=False):
-        path = join(nnextrap_root_relpath, 'pretrained_models/'+model+'s/model_'+str(i))
+        path = join(nnextrap_root_relpath, pretrained_dir, model+'s/model_'+str(i))
         if (exists(path)):
             for file_name in listdir(path):
                 if '.pb' in file_name:

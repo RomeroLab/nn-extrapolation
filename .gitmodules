@@ -1,3 +1,6 @@
 [submodule "nn4dms_nn-extrapolate"]
 	path = nn4dms_nn-extrapolate
 	url = https://github.com/RomeroLab/nn4dms_nn-extrapolate.git
+[submodule "nn-extrapolation-models"]
+	path = nn-extrapolation-models
+	url = https://github.com/RomeroLab/nn-extrapolation-models.git
