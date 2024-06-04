@@ -7,8 +7,10 @@ The code in this module is built on the [nn4dms](github.com/gitter-lab/nn4dms) m
 The model code is in the linked repo [nn4dms](https://github.com/gitter-lab/nn4dms/tree/2b4fcfd6c6e90321f21fa3264f677d639f33ba83). This code is required to reproduce some of our inference results. Code and models to generate model predictions are included as the `nn4dms_nn-extrapolate` and`nn-extrapolate-models` submodules. Download times may be long if cloning submodules. We include download commands for nn-extrapolation with and without submodules.
 
 ```
-# independently clone repo and submodules in seperate steps
+# clone repo without submodules
 gh repo clone RomeroLab/nn-extrapolation
+
+# checkout submodules individually
 git submodule update nn4dms_nn-extrapolate
 git submodule update nn-extrapolation-models
 
