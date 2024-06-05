@@ -1,9 +1,11 @@
 import math
 import numpy as np
+from tqdm import tqdm
 from os.path import join
 from os import listdir
 import pandas as pd
 import sys
+import subprocess
 
 def get_read_data(all_data):
     '''
@@ -67,68 +69,88 @@ if __name__ == '__main__':
         input_seq_df: filed that should contain a column called 'dna_seq' which has the nucleotide seq we want to match
         output_counts_file: where to output the counts for each NGS file
     '''
-
     _, input_directory, date, merged_reads_directory, input_seq_df, output_counts_file = sys.argv
     seq_df = pd.read_csv(input_seq_df)
 
-    file_names = listdir(input_directory)
-    file_name_pairs = []
-    for file_name in file_names:
-        if '.fastq' in file_name and 'R1' in file_name:
-            file_name_match = 'R2'.join(file_name.split('R1'))
-            if file_name in file_names:
-                file_name_pairs.append([file_name, file_name_match])
-                print('Found pair of file reads {}, {}'.format(file_name, file_name_match))
-            else:
-                print('Unable to find match for {}'.format(file_name))
+    # read file names
+    paired_file_paths = pd.read_csv(join(input_directory, 'sra_file_pairs.csv'))
 
-    merged_reads_output_names = ['both_reads'.join(file_name_pair[0].split('R1')) for file_name_pair in file_name_pairs]
-    read_descriptors = [file_name_pair[0].split('R1')[0] + date for file_name_pair in file_name_pairs]
+    # remove date variable from dataframe columns - makes count file more interchangeable
+    merged_reads_output_names = ['both_reads'.join(file.split('R1')) for file in paired_file_paths.R1]
+    read_descriptors = [file.split('R1')[0] for file in paired_file_paths.R1]
 
-    for file_name_pair, merged_reads_output_name in zip(file_name_pairs, merged_reads_output_names):
-        print('Processing {}, {}'.format(*file_name_pair))
+    # save output stats here to print report when done
+    output_stats = []
+
+    # explicitly identify r1 and r2 files while keeping with `file_name_pair` naming scheme below
+    for r1_file, r2_file, merged_reads_output_name in tqdm(zip(paired_file_paths.R1, paired_file_paths.R2, merged_reads_output_names), total=len(paired_file_paths), ncols=100, leave=True, desc='File'):
+        file_name_pair = [r1_file, r2_file]
         read_count = 0
         fwd_all_data = ''
         rev_all_data = ''
-        # open each pair of files
+
+        # open read files
         f1 = open(join(input_directory, file_name_pair[0]), 'r')
         f2 = open(join(input_directory, file_name_pair[1]), 'r')
-        # overwrite existing merged_read_file
+        
+        # write empty merged read file
         with open(join(merged_reads_directory, merged_reads_output_name), 'w') as f:
             f.write('')
+
         # open in appending mode
         out_file = open(join(merged_reads_directory, merged_reads_output_name), 'a')
-        for l1, l2 in zip(f1, f2):
-            # process and write the read
+        for l1, l2 in tqdm(zip(f1, f2), leave=False, desc='Processing reads'):
+            # if a new read description is identified and compiled fwd/rev_all_data is not '',
+            # then fwd/rev_all_data is complete read. Process and identify read.
             if l1[0] == '@' and l2[0] == '@' and fwd_all_data != '' and rev_all_data != '':
                 final_sequence = process_read_pair(fwd_all_data, rev_all_data)
                 out_file.write(final_sequence + '\n')
                 read_count += 1
+
+                # reset fwd/rev_all_data to ''
                 fwd_all_data = ''
                 rev_all_data = ''
-            # append to the new line
+            
+            # append fastq data to fwd/rev_all_data until complete read data is compiled
+            # i.e. read descriptor, sequence, description, and quality scores.
             fwd_all_data += l1
             rev_all_data += l2
-        # process and write final read
+
+        # for loop does not process last read in file - do that here
         final_sequence = process_read_pair(fwd_all_data, rev_all_data)
         out_file.write(final_sequence + '\n')
         read_count += 1
-        print('Merged {} reads'.format(read_count))
 
+        # save output stats
+        output_stats.append((*file_name_pair, read_count))
+
+        # close files
+        f1.close()
+        f2.close()
+        out_file.close()
+
+    # print output_stats
+    print('All reads filtered for quality scores, final read counts:')
+    for r1_file, r2_file, read_cnt in output_stats:
+        print(f"Experiment: {r1_file.split('R1')[0]}  --  Total reads: {read_cnt}")
+
+    print('Identifying reads in filtered fastq files...')
     unsorted_counts = None
-    for merged_reads_output_name, read_descriptor in zip(merged_reads_output_names, read_descriptors):
+    for merged_reads_output_name, read_descriptor in tqdm(zip(merged_reads_output_names, read_descriptors), total=len(paired_file_paths), ncols=100, leave=True, desc='File'):
         # open merged reads again
         with open(join(merged_reads_directory, merged_reads_output_name), 'r') as f:
             sequences = f.read().split('\n')
-        seq_ids = seq_df['seq_ID'].values.tolist()
         possible_sequences = seq_df['dna_seq'].values.tolist()
-        # calculate counts (add a count to a possible sequence iff the read matches exactly)
+
+        # calculate counts (add a count to a possible sequence if the read matches exactly)
+        # counts index matches that of sequence index
         counts = [0 for _ in possible_sequences]
         print('Determining counts for {} reads from {} dataset'.format(len(sequences), read_descriptor))
         for i, sequence in enumerate(sequences):
-            sequence = sequence[58:223] # this portion will also be unique to each protein library
+            sequence = sequence[58:223]  # this is the unique protein sequence in the read
             if sequence in possible_sequences:
                 counts[possible_sequences.index(sequence)] += 1
-        seq_df[read_descriptor + '_count'] = counts
-
-    seq_df.to_csv(output_counts_file, index=False)
+        seq_df[read_descriptor + 'count'] = counts
+    
+    # add date here to distinguish different counts file outputs
+    seq_df.to_csv(date+'_'+output_counts_file, index=False)

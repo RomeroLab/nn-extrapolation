@@ -1,8 +1,20 @@
+
+# large data
 gen_data/raw_pred_extrapolation_wu.csv
+fastq_files/*fastq
+merged_reads
+
+# ignore any temporary fasterq directories just in case
+fastq_files/fasterq*
+
+# miscellaneous and extraneous files
 designs_counts_original.csv
 reformat_df.py
-#pretrained_models/*
 data/olson_pred_fitnesses.csv
+
 .DS_Store
 .ipynb_checkpoints/
 __pycache__/
+
+# ignore any temporary directories
+tmp
