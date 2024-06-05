@@ -26,8 +26,6 @@ if module_path not in sys.path:
 nnextrap_root_relpath = ".."
 pretrained_dir = "nn-extrapolation-models/pretrained_models"
 
-import constants
-import utils
 import encode as enc
 import inference as inf
 import inference_lr as inf_lr
@@ -135,4 +133,4 @@ for direction in ['all', 'all_down', 'wt']:
 
 
     func_df = pd.DataFrame(data=list(zip(*func_all_list)), columns=label_list)
-    func_df.to_csv(join(nnextrap_root_relpath, 'gen_data/mut_func_'+direction+'_tmp.csv'))
+    func_df.to_csv(join(nnextrap_root_relpath, 'gen_data/mut_func_'+direction+'.csv'))
