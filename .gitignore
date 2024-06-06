@@ -1,6 +1,6 @@
 
 # large data
-gen_data/raw_pred_extrapolation_wu.csv
+gen_data/01e_pred_extrapolation_wu.csv
 fastq_files/*fastq
 merged_reads
 

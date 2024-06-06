@@ -152,4 +152,4 @@ save_columns = [
 # save processed data to csv
 df[save_columns].to_csv(join(nnextrap_root_relpath, 'gen_data/pred_extrapolation_wu.csv'))
 # save full data to csv
-df.to_csv(join(nnextrap_root_relpath, 'gen_data/raw_pred_extrapolation_wu.csv'))
+df.to_csv(join(nnextrap_root_relpath, 'gen_data/01e_pred_extrapolation_wu.csv'))
