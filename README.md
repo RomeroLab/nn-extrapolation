@@ -18,10 +18,15 @@ git submodule update nn-extrapolation-models
 gh repo clone RomeroLab/nn-extrapolation -- --recurse-submodules
 ```
 
-Conda environment install and activation:
+We provide two conda environments to reproduce our analysis. `gb1_inf` is used to run all Makefile commands. `gb1_notebook` is used to reproduce data anlysis in the Jupyter notebooks.
 ```
-conda env create -f environment.yml
+# download and install environments
+conda env create -f env_inference.yml
+conda env create -f env_notebook.yml
+
+# activate conda environments
 conda activate gb1_inf
+conda activate gb1_notebook
 ```
 
 Installation takes ~5 minutes.
