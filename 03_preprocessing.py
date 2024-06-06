@@ -145,7 +145,6 @@ if __name__ == '__main__':
         # calculate counts (add a count to a possible sequence if the read matches exactly)
         # counts index matches that of sequence index
         counts = [0 for _ in possible_sequences]
-        print('Determining counts for {} reads from {} dataset'.format(len(sequences), read_descriptor))
         for i, sequence in enumerate(sequences):
             sequence = sequence[58:223]  # this is the unique protein sequence in the read
             if sequence in possible_sequences:
