@@ -1,14 +1,21 @@
 # Import necessary libraries here
-from os import listdir
-from os.path import isfile, join, exists
-import numpy as np
-from simple_inference import encoding
-from simple_inference import inference_lr as inference  # needed to remove training_ph from inference
+from os.path import abspath
+import sys
 
+module_path = abspath("nn4dms_nn-extrapolate/code")
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+print(sys.path)
+
+import numpy as np
+import encoding
+import inference_lr as inference  # use this inference for LR model only - removed training_ph
+# import inference  # use this inference for any model that is not LR
 class seq2fitness_handler:
     def __init__(self):
         
-        model_path = 'pretrained_models/other_models/gb1_lr_ckpt.pb'
+        model_path = 'nn-extrapolation-models/pretrained_models/other_models/gb1_lr_ckpt.pb'
         self.model = inference.restore_sess_from_pb(model_path)
 
         #print('model defined')

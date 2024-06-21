@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
+import os
+from os.path import abspath, join, isdir
+import sys
+
+module_path = abspath("nn4dms_nn-extrapolate/code")
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
 import design_tools as tools
 import pickle
 import random
