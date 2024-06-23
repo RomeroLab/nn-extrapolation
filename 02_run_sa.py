@@ -34,10 +34,11 @@ def run_simulated_annealing(config):
 
     seq2fitness_tools = importlib.__import__(config['seq2fitness_tools'])
     seq2fitness_handler = seq2fitness_tools.seq2fitness_handler()
-
+    print('setting up optimizer...')
     sa_optimizer = tools.SA_optimizer(seq2fitness_handler.seq2fitness, config['WT'], AA_options,
             config['num_mut'], mut_rate=config['mut_rate'], nsteps=config['nsteps'],
             cool_sched=config['cool_sched'])
+    print('running optimization...')
     best_mut, fitness = sa_optimizer.optimize(seed=config['seed'])
     with open(config['export_best_seqs'], 'wb') as f:
         pickle.dump([best_mut, fitness], f)
@@ -47,6 +48,7 @@ def run_simulated_annealing(config):
 
 
 if __name__ == '__main__':
+    print('running 02_run_sa.py', sys.argv[1])
     config = load_config(sys.argv[1])
     run_simulated_annealing(config)
 

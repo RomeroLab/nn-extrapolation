@@ -6,10 +6,9 @@ module_path = abspath("nn4dms_nn-extrapolate/code")
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-print(sys.path)
 
 import numpy as np
-import encoding
+import encode as encoding
 import inference_lr as inference  # use this inference for LR model only - removed training_ph
 # import inference  # use this inference for any model that is not LR
 class seq2fitness_handler:
