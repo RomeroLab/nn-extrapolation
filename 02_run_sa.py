@@ -6,9 +6,19 @@ import os
 from os.path import abspath, join, isdir
 import sys
 
-module_path = abspath("nn4dms_nn-extrapolate/code")
+# for relative paths in nn4dms code to work properly, we need to set the current working
+# directory to the root of the project
+# we also need to add the code folder to the system path for imports to work properly
+
+print('Setting working directory to nn4dms root.')
+os.chdir('nn4dms_nn-extrapolate')
+module_path = abspath("code")
 if module_path not in sys.path:
     sys.path.append(module_path)
+
+# add relative path to write directory (nn-extrapolate)
+nnextrap_root_relpath = '..'
+pretrained_dir = "nn-extrapolation-models/pretrained_models"
 
 import design_tools as tools
 import pickle
@@ -18,10 +28,11 @@ import sys
 import yaml
 import importlib
 
+
 AAs = 'ACDEFGHIKLMNPQRSTVWY'
 
 def load_config(config_file):
-    with open(config_file, 'r') as stream:
+    with open(join(nnextrap_root_relpath, config_file), 'r') as stream:
         try:
             return yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -40,11 +51,11 @@ def run_simulated_annealing(config):
             cool_sched=config['cool_sched'])
     print('running optimization...')
     best_mut, fitness = sa_optimizer.optimize(seed=config['seed'])
-    with open(config['export_best_seqs'], 'wb') as f:
+    with open(join(nnextrap_root_relpath, config['export_best_seqs']), 'wb') as f:
         pickle.dump([best_mut, fitness], f)
 
     if config['save_plot_trajectory']:
-        sa_optimizer.plot_trajectory(savefig_name=config['file_plot_trajectory'])
+        sa_optimizer.plot_trajectory(savefig_name=join(nnextrap_root_relpath, config['file_plot_trajectory']))
 
 
 if __name__ == '__main__':
